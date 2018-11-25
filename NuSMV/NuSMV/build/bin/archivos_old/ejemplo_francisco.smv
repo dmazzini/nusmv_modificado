@@ -1,0 +1,18 @@
+-- A simple counter
+MODULE main
+VAR
+  y : 0..15;
+z: 0..2;
+
+ASSIGN
+  init(y) := 0;
+init(z) := 0;
+
+TRANS
+  case
+    y = 7 :  next(y) = 0;
+    TRUE     :  next(y) = (y + 1) mod 16;
+z = 0 : next(z) = 0;
+  esac
+
+LTLSPEC NAME alpha :=  F( y = 2 |  z = 3)

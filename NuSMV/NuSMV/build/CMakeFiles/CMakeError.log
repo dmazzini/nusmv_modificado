@@ -1,0 +1,92 @@
+Determining if the include file ndir.h exists failed with the following output:
+Change Dir: /home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec1800437332/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1800437332.dir/build.make CMakeFiles/cmTryCompileExec1800437332.dir/build
+make[1]: Entering directory '/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec1800437332.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec1800437332.dir/CheckIncludeFile.c.o   -c /home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:18: fatal error: ndir.h: No such file or directory
+ #include <ndir.h>
+                  ^
+compilation terminated.
+CMakeFiles/cmTryCompileExec1800437332.dir/build.make:57: recipe for target 'CMakeFiles/cmTryCompileExec1800437332.dir/CheckIncludeFile.c.o' failed
+make[1]: *** [CMakeFiles/cmTryCompileExec1800437332.dir/CheckIncludeFile.c.o] Error 1
+make[1]: Leaving directory '/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp'
+Makefile:118: recipe for target 'cmTryCompileExec1800437332/fast' failed
+make: *** [cmTryCompileExec1800437332/fast] Error 2
+
+
+Determining if the include file sys/ndir.h exists failed with the following output:
+Change Dir: /home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec4121471876/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec4121471876.dir/build.make CMakeFiles/cmTryCompileExec4121471876.dir/build
+make[1]: Entering directory '/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec4121471876.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec4121471876.dir/CheckIncludeFile.c.o   -c /home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:22: fatal error: sys/ndir.h: No such file or directory
+ #include <sys/ndir.h>
+                      ^
+compilation terminated.
+CMakeFiles/cmTryCompileExec4121471876.dir/build.make:57: recipe for target 'CMakeFiles/cmTryCompileExec4121471876.dir/CheckIncludeFile.c.o' failed
+make[1]: *** [CMakeFiles/cmTryCompileExec4121471876.dir/CheckIncludeFile.c.o] Error 1
+make[1]: Leaving directory '/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp'
+Makefile:118: recipe for target 'cmTryCompileExec4121471876/fast' failed
+make: *** [cmTryCompileExec4121471876/fast] Error 2
+
+
+Determining if the function floor exists failed with the following output:
+Change Dir: /home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec2080638915/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2080638915.dir/build.make CMakeFiles/cmTryCompileExec2080638915.dir/build
+make[1]: Entering directory '/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec2080638915.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=floor   -o CMakeFiles/cmTryCompileExec2080638915.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘floor’
+/usr/share/cmake-3.0/Modules/CheckFunctionExists.c:3:6: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+ char CHECK_FUNCTION_EXISTS();
+      ^
+Linking C executable cmTryCompileExec2080638915
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2080638915.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=floor    CMakeFiles/cmTryCompileExec2080638915.dir/CheckFunctionExists.c.o  -o cmTryCompileExec2080638915 -rdynamic 
+CMakeFiles/cmTryCompileExec2080638915.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x15): undefined reference to `floor'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTryCompileExec2080638915.dir/build.make:88: recipe for target 'cmTryCompileExec2080638915' failed
+make[1]: *** [cmTryCompileExec2080638915] Error 1
+make[1]: Leaving directory '/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp'
+Makefile:118: recipe for target 'cmTryCompileExec2080638915/fast' failed
+make: *** [cmTryCompileExec2080638915/fast] Error 2
+
+
+Determining if the function pow exists failed with the following output:
+Change Dir: /home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec672733228/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec672733228.dir/build.make CMakeFiles/cmTryCompileExec672733228.dir/build
+make[1]: Entering directory '/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec672733228.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pow   -o CMakeFiles/cmTryCompileExec672733228.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘pow’
+/usr/share/cmake-3.0/Modules/CheckFunctionExists.c:3:6: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+ char CHECK_FUNCTION_EXISTS();
+      ^
+Linking C executable cmTryCompileExec672733228
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec672733228.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pow    CMakeFiles/cmTryCompileExec672733228.dir/CheckFunctionExists.c.o  -o cmTryCompileExec672733228 -rdynamic 
+CMakeFiles/cmTryCompileExec672733228.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x15): undefined reference to `pow'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTryCompileExec672733228.dir/build.make:88: recipe for target 'cmTryCompileExec672733228' failed
+make[1]: *** [cmTryCompileExec672733228] Error 1
+make[1]: Leaving directory '/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/CMakeFiles/CMakeTmp'
+Makefile:118: recipe for target 'cmTryCompileExec672733228/fast' failed
+make: *** [cmTryCompileExec672733228/fast] Error 2
+
+

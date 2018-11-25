@@ -1,0 +1,73 @@
+MODULE main
+VAR	
+	i0: {HA, NH, JH};
+  	i1: {HA, NH, JH};
+  	i2: {HA, NH, JH};
+  	i3: 0..1;
+	i4: 0..1;
+	i5: 0..20;
+INIT
+	i0 = NH &
+	i1 = NH &
+	i2 = NH &
+   	i3 =  0 &
+	i4 =  0 &
+	i5 =  0 &
+    TRUE 
+TRANS
+		 	(i0 = JH -> next(i0) = NH) &
+		(i0 = HA -> next(i0) != NH ) &
+		(i0 = NH -> next(i0) != JH) &
+	  		 	(i1 = JH -> next(i1) = NH) &
+		(i1 = HA -> next(i1) != NH ) &
+		(i1 = NH -> next(i1) != JH) &
+	  		 	(i2 = JH -> next(i2) = NH) &
+		(i2 = HA -> next(i2) != NH ) &
+		(i2 = NH -> next(i2) != JH) &
+ 	(next(i2) = JH  & (i3 + 1 <= 1) 
+	& (i3 + 1 >= 0) -> next(i3) = i3 + 1) &		
+  	(next(i1) = JH  & (i4 + 1 <= 1) 
+	& (i4 + 1 >= 0) -> next(i4) = i4 + 1) &		
+  	(next(i1) = JH  & (i5 + 1 <= 20) 
+	& (i5 + 1 >= 0) -> next(i5) = i5 + 1) &		
+ 	(next(i2) = JH  & (i5 + 1 <= 20) 
+	& (i5 + 1 >= 0) -> next(i5) = i5 + 1) &		
+  	 		(next(i2) = JH 	& (i3 + 1 < 0) 
+	-> next(i3) = 0 ) &	
+	   	 		(next(i1) = JH 	& (i4 + 1 < 0) 
+	-> next(i4) = 0 ) &	
+	   		(next(i1) = JH 	& (i5 + 1 > 20)
+	-> next(i5) = 20 ) &	
+	 		(next(i1) = JH 	& (i5 + 1 < 0) 
+	-> next(i5) = 0 ) &	
+	  		(next(i2) = JH 	& (i5 + 1 > 20)
+	-> next(i5) = 20 ) &	
+	 		(next(i2) = JH 	& (i5 + 1 < 0) 
+	-> next(i5) = 0 ) &	
+	  		(
+  	(next(i0) != JH  ) &  	(next(i2) != JH  )   	-> next(i3) = i3 ) &
+  		(
+  	(next(i1) != JH  ) &  	(next(i0) != JH  )   	-> next(i4) = i4 ) &
+  		(
+  	(next(i1) != JH  ) &  	(next(i2) != JH  )   	-> next(i5) = i5 ) &
+ 	 	(next(i0) = JH 	-> next(i3) = 0) &		
+ 	 	(next(i0) = JH 	-> next(i4) = 0) &		
+ 	 	 	(next(i0) = JH -> TRUE 
+           & next(i2) !=  JH        ) &
+ 	(next(i2) = JH -> TRUE 
+      & next(i0) !=  JH             ) &
+ 	 	(next(i1) = JH -> TRUE 
+           & next(i0) !=  JH        ) &
+ 	(next(i0) = JH -> TRUE 
+      & next(i1) !=  JH             ) &
+ 	 	(next(i1) = JH -> TRUE 
+           & next(i2) !=  JH        ) &
+ 	(next(i2) = JH -> TRUE 
+      & next(i1) !=  JH             ) &
+  	        (i2 = NH & 
+    	(1 > 0) & 
+	(i3 + 1 > 1) -> next(i2) = NH ) &		
+       	        (i1 = NH & 
+    	(1 > 0) & 
+	(i4 + 1 > 1) -> next(i1) = NH ) &		
+       	      	      TRUE

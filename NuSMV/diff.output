@@ -1,0 +1,481 @@
+Only in NuSMV-2.6.0/NuSMV: build
+diff -ru NuSMV-2.6.0.original/NuSMV/CMakeLists.txt NuSMV-2.6.0/NuSMV/CMakeLists.txt
+--- NuSMV-2.6.0.original/NuSMV/CMakeLists.txt	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/CMakeLists.txt	2016-08-01 18:35:22.030839880 -0300
+@@ -18,7 +18,7 @@
+ option(ENABLE_READLINE "Links NuSMV with readline library" ON)
+ option(ENABLE_BMCPROFILER "Links NuSMV with the bmc profiler library" OFF)
+ option(ENABLE_WATCHDOG "Links NuSMV with the watchdog library" OFF)
+-option(ENABLE_ZCHAFF "Makes the ZChaff SAT solver usable from within NuSMV" OFF)
++option(ENABLE_ZCHAFF "Makes the ZChaff SAT solver usable from within NuSMV" ON)
+ option(ENABLE_MINISAT "Makes the MiniSat SAT solver usable from within NuSMV" ON)
+ option(ENABLE_COMPASS "Enable the Compass addons" ON)
+ option(ENABLE_STATIC_LINK "Link all executables statically" OFF)
+diff -ru NuSMV-2.6.0.original/NuSMV/code/nusmv/core/be/beCnf.c NuSMV-2.6.0/NuSMV/code/nusmv/core/be/beCnf.c
+--- NuSMV-2.6.0.original/NuSMV/code/nusmv/core/be/beCnf.c	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/code/nusmv/core/be/beCnf.c	2017-04-01 09:45:23.688982674 -0300
+@@ -69,6 +69,8 @@
+   /* literal assigned to whole CNF formula. (It may be negative)
+      If the formula is a constant, see Be_Cnf_ptr. */
+   int formulaLiteral;
++  
++  Sset_ptr converted_values;
+ } Be_Cnf;
+ 
+ 
+@@ -110,6 +112,8 @@
+   self->cnfClauses = Slist_create();
+   self->cnfMaxVarIdx = 0;
+   self->formulaLiteral = 0;
++  
++  self->converted_values = NULL; 
+ 
+   return self;
+ }
+@@ -120,10 +124,24 @@
+ 
+   Slist_destroy_and_free_elements(self->cnfClauses, _be_cnf_destroy_clause);
+   Slist_destroy(self->cnfVars);
+-
++  
++  if(NULL != self->converted_values) 
++  {
++      Sset_destroy(self->converted_values);
++  }
+   FREE(self);
+ }
+ 
++Sset_ptr Be_Cnf_GetConvertedValues(Be_Cnf_ptr self)
++{
++    return self->converted_values;
++}
++
++void Be_Cnf_SetConvertedValues(Be_Cnf_ptr self, Sset_ptr new)
++{
++    self->converted_values = new;
++}
++
+ void Be_Cnf_RemoveDuplicateLiterals(Be_Cnf_ptr self)
+ {
+   int i, j;
+diff -ru NuSMV-2.6.0.original/NuSMV/code/nusmv/core/be/be.h NuSMV-2.6.0/NuSMV/code/nusmv/core/be/be.h
+--- NuSMV-2.6.0.original/NuSMV/code/nusmv/core/be/be.h	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/code/nusmv/core/be/be.h	2017-04-01 09:45:40.468982674 -0300
+@@ -127,7 +127,7 @@
+ 
+ #include "nusmv/core/utils/Slist.h"
+ #include "nusmv/core/cinit/NuSMVEnv.h"
+-
++#include "nusmv/core/utils/Sset.h"
+ 
+ /*---------------------------------------------------------------------------*/
+ /* Constant declarations                                                     */
+@@ -332,6 +332,15 @@
+ 
+ /*!
+   \methodof Be_Cnf
++  \brief Returns the set of converted values in the given 
++  Be_Cnf structure
++
++
++*/                                                                            
++Sset_ptr Be_Cnf_GetConvertedValues(Be_Cnf_ptr self);
++
++/*!
++  \methodof Be_Cnf
+   \brief Sets the literal assigned to the whole formula
+ 
+ 
+@@ -347,6 +356,7 @@
+ */
+ void Be_Cnf_SetMaxVarIndex(const Be_Cnf_ptr self,
+                                       const int max_idx);
++                                    
+ /* ================================================== */
+ 
+ 
+diff -ru NuSMV-2.6.0.original/NuSMV/code/nusmv/core/be/beRbcManager.c NuSMV-2.6.0/NuSMV/code/nusmv/core/be/beRbcManager.c
+--- NuSMV-2.6.0.original/NuSMV/code/nusmv/core/be/beRbcManager.c	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/code/nusmv/core/be/beRbcManager.c	2017-03-31 18:32:17.216191000 -0300
+@@ -46,6 +46,7 @@
+ #include "nusmv/core/opt/opt.h"
+ #include "nusmv/core/utils/defs.h"
+ 
++#include "nusmv/core/rbc/rbcInt.h" 
+ /*---------------------------------------------------------------------------*/
+ /* Constant declarations                                                     */
+ /*---------------------------------------------------------------------------*/
+@@ -246,6 +247,7 @@
+   Be_Cnf_ptr cnf;
+   int max_var_idx;
+   int literalAssignedToWholeFormula = INT_MIN;
++  Rbc_Manager_t* rbc_mgr;
+ 
+   /* performs the cnf conversion: */
+   if (opt_verbose_level_gt(opts, 0)) {
+@@ -262,7 +264,9 @@
+                                 &literalAssignedToWholeFormula);
+ 
+   nusmv_assert(literalAssignedToWholeFormula >= INT_MIN);
+-
++  rbc_mgr = GET_RBC_MGR(manager);
++  Be_Cnf_SetConvertedValues(cnf ,Sset_copy(rbc_mgr->renamed_values));
++  
+   Be_Cnf_RemoveDuplicateLiterals(cnf);
+ 
+   Be_Cnf_SetMaxVarIndex(cnf, max_var_idx);
+diff -ru NuSMV-2.6.0.original/NuSMV/code/nusmv/core/bmc/bmcDump.c NuSMV-2.6.0/NuSMV/code/nusmv/core/bmc/bmcDump.c
+--- NuSMV-2.6.0.original/NuSMV/code/nusmv/core/bmc/bmcDump.c	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/code/nusmv/core/bmc/bmcDump.c	2017-04-01 12:05:57.868982674 -0300
+@@ -50,6 +50,9 @@
+ #include "nusmv/core/prop/Prop.h"
+ #include "nusmv/core/utils/ucmd.h" /* for SubstString */
+ #include "nusmv/core/utils/defs.h" /* for PRIuPTR */
++
++#include "nusmv/core/be/beManagerInt.h" /* To get the rbcManager in Bmc_Dump_DimacsProblem. */
++#include "nusmv/core/utils/Sset.h"      /* To get the renamedValues from the cnf */
+ /*---------------------------------------------------------------------------*/
+ /* Constant declarations                                                     */
+ /*---------------------------------------------------------------------------*/
+@@ -267,10 +270,20 @@
+ 
+   int time;
+   Be_Manager_ptr be_mgr;
++  Rbc_Manager_t* rbc_mgr;
++  
++
++  Ssiter set_iter; 
++  Sset_ptr conversion;
++  lsList lvalues;
++  lsGen gen;
++  lsGeneric data;
+ 
+   nusmv_assert(dimacsfile != NULL);
+ 
+   be_mgr = BeEnc_get_be_manager(be_enc);
++  
++  rbc_mgr = (Rbc_Manager_t*) be_mgr->spec_manager;
+ 
+   if (opt_verbose_level_gt(opts, 0)) {
+     Logger_ptr logger = LOGGER(NuSMVEnv_get_value(env, ENV_LOGGER));
+@@ -290,15 +303,17 @@
+           BeEnc_get_input_vars_num(be_enc));
+ 
+   fprintf(dimacsfile, "c Model to Dimacs Conversion Table\n");
+-
++  
+   for (time = 0; time <= k; ++time) {
+     int iter;
+     fprintf(dimacsfile, "c \nc @@@@@ Time %d\n", time);
+ 
++
+     iter = BeEnc_get_first_untimed_var_index(be_enc,
+                                              BE_VAR_TYPE_CURR |
+                                              BE_VAR_TYPE_FROZEN |
+                                              BE_VAR_TYPE_INPUT);
++
+     while (BeEnc_is_var_index_valid(be_enc, iter)) {
+       /* to avoid dumping of input variables at time k and
+          frozen variable at time > 0 (since such variables do not exist) */
+@@ -318,7 +333,7 @@
+           fprintf(dimacsfile, "\n");
+         }
+       }
+-
++      
+       iter = BeEnc_get_next_var_index(be_enc, iter,
+                       BE_VAR_TYPE_CURR | BE_VAR_TYPE_FROZEN | BE_VAR_TYPE_INPUT);
+     }
+@@ -380,6 +395,26 @@
+         fprintf(dimacsfile, "0\n");
+       }
+     }
++    conversion = (Sset_ptr) Be_Cnf_GetConvertedValues(cnf);
++    fprintf(dimacsfile, "c @@@@@ Converted values \n");
++    for (set_iter = Sset_first(conversion); Ssiter_is_valid(set_iter) ; set_iter = Ssiter_next(set_iter))
++    {
++      fprintf(dimacsfile, "c converted %d : ", PTR_TO_INT(Ssiter_key(set_iter)));
++      lvalues = (lsList) Ssiter_element(set_iter);
++      
++      if (lsFirstItem(lvalues, &data, LS_NH) == LS_OK) {
++          fprintf(dimacsfile, "[%d", *((int*) data));
++      }
++      
++      gen = lsStart(lvalues);
++      // We already printed the first element
++      lsNext(gen, &data, LS_NH);
++      while (lsNext(gen, &data, LS_NH) == LS_OK) {
++          fprintf(dimacsfile, ", %d", *((int*) data));
++      }
++      fprintf(dimacsfile, "]\n");
++      lsFinish(gen);
++    }
+     fprintf(dimacsfile, "c End of dimacs dumping\n");
+   }
+ 
+diff -ru NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/clg/clgClg.c NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/clg/clgClg.c
+--- NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/clg/clgClg.c	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/clg/clgClg.c	2017-03-31 18:36:10.824191000 -0300
+@@ -43,6 +43,8 @@
+ #include "nusmv/core/node/node.h"
+ #include "nusmv/core/utils/error.h"
+ 
++#include "nusmv/core/utils/list.h"
++
+ 
+ /*---------------------------------------------------------------------------*/
+ /* Constant declarations                                                     */
+@@ -200,6 +202,26 @@
+   Extract(env, head, Nil, 0, type, commit, data);
+ }
+ 
++void Clg_Get_Labels(clause_graph node, lsList *l)
++{
++    int status;
++    int *labelCopy;
++    if (node == NULL)
++        return;
++
++    Clg_Get_Labels(node->left, l);
++
++    if(10 != node->label && 11 != node->label)
++    {
++        labelCopy = ALLOC(int, 1);
++        nusmv_assert(labelCopy != (int*) NULL);
++        *labelCopy = node->label;
++        // label is not and "AND" nor a "OR";
++        status = lsNewEnd(*l, (lsGeneric)labelCopy, LS_NH);
++    }
++
++    Clg_Get_Labels(node->right, l);
++}
+ 
+ /*---------------------------------------------------------------------------*/
+ /* Definition of internal functions                                          */
+diff -ru NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/clg/clg.h NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/clg/clg.h
+--- NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/clg/clg.h	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/clg/clg.h	2017-03-31 18:36:43.528191000 -0300
+@@ -176,5 +176,8 @@
+ 
+ /**AutomaticEnd***************************************************************/
+ 
++void Clg_Get_Labels(clause_graph node, lsList *l);
++
++
+ #endif /* __NUSMV_CORE_RBC_CLG_CLG_H__ */
+ 
+diff -ru NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/rbcCnf.c NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/rbcCnf.c
+--- NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/rbcCnf.c	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/rbcCnf.c	2016-11-17 16:53:43.475982576 -0300
+@@ -138,8 +138,7 @@
+     break;
+ 
+   case RBC_SHERIDAN_CONVERSION:
+-    result = Rbc_Convert2CnfCompact(rbcManager, f, polarity, clauses, vars,
+-                                    literalAssignedToWholeFormula);
++    result = Rbc_Convert2CnfCompact(rbcManager, f, polarity, clauses, vars, literalAssignedToWholeFormula);
+     break;
+ 
+     default:
+diff -ru NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/rbcCnfCompact.c NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/rbcCnfCompact.c
+--- NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/rbcCnfCompact.c	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/rbcCnfCompact.c	2017-04-01 20:49:49.397898001 -0300
+@@ -128,7 +128,7 @@
+ static void CnfCompactCleanFirst(Rbc_t* f, char* cnfData, nusmv_ptrint sign);
+ 
+ static void rename_clauses(ClgManager_ptr clgManager,
+-                           clause_graph* clauses, int var, clause_graph* saved);
++                           clause_graph* clauses, int var, clause_graph* saved, Sset_ptr rbcManager);
+ 
+ static inline void disjunction(ClgManager_ptr clgManager,
+                                clause_graph* Left, clause_graph* Right,
+@@ -170,12 +170,13 @@
+                or 0 respectively). If 'polarity' is 1/-1 then only the
+                clauses representing the true/false RBC are returned. Otherwise,
+                both sets are returned.
++               `f' was false.
++
++
+ 
+   \se `clauses' and `vars' are filled up. `clauses' is the empty
+                list if `f' was true, and contains a single empty clause if
+-               `f' was false.
+ */
+-
+ int Rbc_Convert2CnfCompact(Rbc_Manager_t* rbcManager, Rbc_t* f,
+                            int polarity, Slist_ptr clauses, Slist_ptr vars,
+                            int* literalAssignedToWholeFormula)
+@@ -184,6 +185,10 @@
+   CnfCompactDfsData_t cnfData;
+   int renamed = 0;
+   const NuSMVEnv_ptr env = Rbc_ManagerGetEnvironment(rbcManager);
++  
++  assoc_iter iter;
++  node_ptr var, assignment ;
++  clause_graph* c;
+ 
+   /* The caller will ensure this */
+   nusmv_assert(*literalAssignedToWholeFormula == INT_MAX);
+@@ -206,7 +211,6 @@
+   cnfFunctions.LastVisit  = (PF_VPVPCPI)CnfEmpty;
+   Dag_Dfs(f, &cnfFunctions, (char*) (&cnfData));
+ 
+-
+   /* Reset our opinion of the polarity (the previous DFS returns the polarity
+      of the top node; we need to start again with a positive polarity to ensure
+      that the sign of the top node is correctly honoured) */
+@@ -225,25 +229,30 @@
+   if (polarity >= 0) {
+     renamed = Rbc_get_node_cnf(rbcManager, RBCDUMMY, &(cnfData.maxVar));
+     nusmv_assert(0 != renamed);
++  
+     rename_clauses(cnfData.clgManager,
+-                   &(cnfData.posClauses), renamed, &(cnfData.clauses));
++                   &(cnfData.posClauses), renamed, &(cnfData.clauses), cnfData.rbcManager->renamed_values);
++
+   }
+   if (polarity <= 0) {
+     if (polarity < 0) {
+       renamed = Rbc_get_node_cnf(rbcManager, RBCDUMMY, &(cnfData.maxVar));
+     }
+     nusmv_assert(0 != renamed);
++  
+     rename_clauses(cnfData.clgManager,
+-                   &(cnfData.negClauses), -renamed, &(cnfData.clauses));
++                   &(cnfData.negClauses), -renamed, &(cnfData.clauses), cnfData.rbcManager->renamed_values);
++
+   }
+ 
+   *literalAssignedToWholeFormula = renamed;
+ 
+   Clg_Extract(env, cnfData.clauses, CLG_NUSMV,
+               (Clg_Commit) CnfCompactCommit, (void*) &(clauses));
++  
+   ClgManager_destroy(cnfData.clgManager);
+-
+-
++  
++  
+   /* Clean the graph of the allocated data */
+   cnfFunctions.Set        = (PF_IVPCPI)CnfCompactCleanSet;
+   cnfFunctions.FirstVisit = (PF_VPVPCPI)CnfCompactCleanFirst;
+@@ -683,11 +692,14 @@
+      converted. */
+   if ((nd->posRef) > 1) {
+     nusmv_assert(0 != cnfVar);
+-    rename_clauses(cd->clgManager, &resultPos, cnfVar, &(cd->clauses));
++    rename_clauses(cd->clgManager, &resultPos, cnfVar, &(cd->clauses), cd->rbcManager->renamed_values);
++    /* We save the renaming resultPos --> cnfVar in the map*/
+   }
+   if ((nd->negRef) > 1) {
+     nusmv_assert(0 != cnfVar);
+-    rename_clauses(cd->clgManager, &resultNeg, -cnfVar, &(cd->clauses));
++    rename_clauses(cd->clgManager, &resultNeg, -cnfVar, &(cd->clauses), cd->rbcManager->renamed_values);
++    
++    /* We save the renaming resultNeg --> -cnfVar in the map*/
+   }
+ 
+   nusmv_assert((nd->posRef) == 0 || Clg_Size(resultPos) > 0);
+@@ -776,12 +788,20 @@
+ 
+ static void rename_clauses(ClgManager_ptr clgManager,
+                            clause_graph* clauses, int var,
+-                           clause_graph* saved)
++                           clause_graph* saved,
++                           Sset_ptr renamed_clauses)
+ {
+   clause_graph clause, lit;
++  lsList list;
++  lsGen gen;
++  lsGeneric data;
+ 
+   nusmv_assert(0 != var);
+-
++  
++  list = lsCreate();
++  Clg_Get_Labels(*clauses, &list);
++  Sset_insert(renamed_clauses, PTR_FROM_INT(Sset_key, -var), list);
++  
+   lit = Clg_Lit(clgManager, -var);
+   clause = Clg_Disj(clgManager, lit, *clauses);
+   *saved = Clg_Conj(clgManager, *saved, clause);
+@@ -812,10 +832,10 @@
+   if (testSizes(*Right, *Left)) {
+     int cnf;
+     cnf = Rbc_get_node_cnf(rbcm, RBCDUMMY, maxVar);
+-    rename_clauses(clgManager, Left, cnf, clauses);
++    rename_clauses(clgManager, Left, cnf, clauses, rbcm->renamed_values);
+ #ifdef CNF_CONV_SP
+     cnf = Rbc_get_node_cnf(rbcm, RBCDUMMY, maxVar);
+-    rename_clauses(clgManager, Right, cnf, clauses);
++    rename_clauses(clgManager, Right, cnf, clauses, rbcm->renamed_values);
+ #endif
+   }
+ } /* End of disjunction */
+@@ -850,12 +870,12 @@
+   if (testSizes(*Right1, *Left1)) {
+     var = Rbc_get_node_cnf(rbcm, RBCDUMMY, maxVar);
+     nusmv_assert(0 != var);
+-    rename_clauses(clgManager, Left1, var, clauses);
++    rename_clauses(clgManager, Left1, var, clauses, rbcm->renamed_values);
+   }
+   if (testSizes(*Right2, *Left2)) {
+     var = Rbc_get_node_cnf(rbcm, RBCDUMMY, maxVar);
+     nusmv_assert(0 != var);
+-    rename_clauses(clgManager, Left2, -var, clauses);
++    rename_clauses(clgManager, Left2, -var, clauses, rbcm->renamed_values);
+   }
+ } /* End of disjunction2 */
+ 
+diff -ru NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/rbcInt.h NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/rbcInt.h
+--- NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/rbcInt.h	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/rbcInt.h	2017-03-31 18:40:44.928191000 -0300
+@@ -47,6 +47,8 @@
+ #include "nusmv/core/utils/utils.h"
+ #include "nusmv/core/utils/assoc.h"
+ 
++#include "nusmv/core/utils/Sset.h" /* For the renamed_values field. */
++
+ /*---------------------------------------------------------------------------*/
+ /* Constant declarations                                                     */
+ /*---------------------------------------------------------------------------*/
+@@ -183,6 +185,9 @@
+   int maxCnfVariable;
+ 
+   int stats[RBCMAX_STAT];
++  
++  /* Set of renamed variables in the conversion */
++  Sset_ptr renamed_values;
+ };
+ 
+ 
+diff -ru NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/rbcManager.c NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/rbcManager.c
+--- NuSMV-2.6.0.original/NuSMV/code/nusmv/core/rbc/rbcManager.c	2015-10-14 10:29:52.000000000 -0300
++++ NuSMV-2.6.0/NuSMV/code/nusmv/core/rbc/rbcManager.c	2017-04-01 20:51:21.237898001 -0300
+@@ -139,7 +139,11 @@
+   Dag_VertexMark(rbcManager -> one);
+   /* 0 is simply the complement of 1. */
+   rbcManager -> zero = RbcId(rbcManager -> one, RBC_FALSE);
+-
++  
++  /* We create the set for the renamed clauses. */
++  rbcManager->renamed_values = Sset_create();
++  
++  
+   return rbcManager;
+ 
+ } /* End of Rbc_ManagerAlloc. */
+@@ -193,6 +197,9 @@
+   free_assoc(rbcManager -> cnfVar2rbcNode_cnf);
+ 
+   rbc_inlining_cache_quit(rbcManager);
++  
++  /* We release the set of renamed values.*/
++  Sset_destroy(rbcManager->renamed_values);
+ 
+   /* Free the rbc itself.  */
+   FREE(rbcManager);
+Only in NuSMV-2.6.0/NuSMV: nbproject
+Only in NuSMV-2.6.0.original/: NuSMV-2.6.0
+Only in NuSMV-2.6.0/: output.txt
+Only in NuSMV-2.6.0/scripts: html2text.pyc

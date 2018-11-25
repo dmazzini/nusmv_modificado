@@ -1,0 +1,219 @@
+--Agente: roles asignados
+--agent_1: vendedor
+--agent_4: vendedor, comprador
+--agent_5: comprador
+--agent_2: minorista, comprador
+--agent_3: mayorista, comprador
+--agent_8: vendedor, mayorista, comprador
+--agent_9: minorista, mayorista, comprador
+--agent_6: minorista, vendedor, comprador
+--agent_7: minorista, vendedor, mayorista, comprador
+
+MODULE main
+VAR	
+	agent_6.vender: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_4.vender: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_8.vender: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_7.vender: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_9.comprar: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_4.comprar: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_5.comprar: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_6.comprar: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_1.vender: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_3.comprar: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_8.comprar: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_7.comprar: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	agent_2.comprar: {HAPPENING, NOT_HAPPENING, JUST_HAPPENED};
+  	ventas_realizadas: 0..20;
+	compras_realizadas: 0..20;
+
+INIT
+	--Se inicializan todas las acciones en NOT_HAPPENING 
+	agent_6.vender = NOT_HAPPENING &
+	agent_4.vender = NOT_HAPPENING &
+	agent_8.vender = NOT_HAPPENING &
+	agent_7.vender = NOT_HAPPENING &
+	agent_9.comprar = NOT_HAPPENING &
+	agent_4.comprar = NOT_HAPPENING &
+	agent_5.comprar = NOT_HAPPENING &
+	agent_6.comprar = NOT_HAPPENING &
+	agent_1.vender = NOT_HAPPENING &
+	agent_3.comprar = NOT_HAPPENING &
+	agent_8.comprar = NOT_HAPPENING &
+	agent_7.comprar = NOT_HAPPENING &
+	agent_2.comprar = NOT_HAPPENING &
+             	ventas_realizadas =  0 &
+	compras_realizadas =  0 &
+    TRUE 
+
+TRANS
+	--En el caso de representar la accion con tres estados:
+		--Las acciones que están en JH pasan a NH
+		--Desde H se puede pasar a JH o quedarse en H (= no pueden pasar a NH)
+		--Desde NH se puede pasar a H o quedarse en NH (= no pueden pasar a JH)
+	--En el caso de representar la accion con dos estados:
+		--Desde H se puede pasar a NH o quedarse en H (ya no pueden pasar a JH)
+		--Desde NH se puede pasar a H o quedarse en NH (= no pueden pasar a JH)
+	--Si tienen hasOccursIn => si están en H => hasOccursIn = activo
+		 	(agent_6.vender = JUST_HAPPENED -> next(agent_6.vender) = NOT_HAPPENING) &
+		(agent_6.vender = HAPPENING -> next(agent_6.vender) != NOT_HAPPENING ) &
+		(agent_6.vender = NOT_HAPPENING -> next(agent_6.vender) != JUST_HAPPENED) &
+	  		 	(agent_4.vender = JUST_HAPPENED -> next(agent_4.vender) = NOT_HAPPENING) &
+		(agent_4.vender = HAPPENING -> next(agent_4.vender) != NOT_HAPPENING ) &
+		(agent_4.vender = NOT_HAPPENING -> next(agent_4.vender) != JUST_HAPPENED) &
+	  		 	(agent_8.vender = JUST_HAPPENED -> next(agent_8.vender) = NOT_HAPPENING) &
+		(agent_8.vender = HAPPENING -> next(agent_8.vender) != NOT_HAPPENING ) &
+		(agent_8.vender = NOT_HAPPENING -> next(agent_8.vender) != JUST_HAPPENED) &
+	  		 	(agent_7.vender = JUST_HAPPENED -> next(agent_7.vender) = NOT_HAPPENING) &
+		(agent_7.vender = HAPPENING -> next(agent_7.vender) != NOT_HAPPENING ) &
+		(agent_7.vender = NOT_HAPPENING -> next(agent_7.vender) != JUST_HAPPENED) &
+	  		 	(agent_9.comprar = JUST_HAPPENED -> next(agent_9.comprar) = NOT_HAPPENING) &
+		(agent_9.comprar = HAPPENING -> next(agent_9.comprar) != NOT_HAPPENING ) &
+		(agent_9.comprar = NOT_HAPPENING -> next(agent_9.comprar) != JUST_HAPPENED) &
+	  		 	(agent_4.comprar = JUST_HAPPENED -> next(agent_4.comprar) = NOT_HAPPENING) &
+		(agent_4.comprar = HAPPENING -> next(agent_4.comprar) != NOT_HAPPENING ) &
+		(agent_4.comprar = NOT_HAPPENING -> next(agent_4.comprar) != JUST_HAPPENED) &
+	  		 	(agent_5.comprar = JUST_HAPPENED -> next(agent_5.comprar) = NOT_HAPPENING) &
+		(agent_5.comprar = HAPPENING -> next(agent_5.comprar) != NOT_HAPPENING ) &
+		(agent_5.comprar = NOT_HAPPENING -> next(agent_5.comprar) != JUST_HAPPENED) &
+	  		 	(agent_6.comprar = JUST_HAPPENED -> next(agent_6.comprar) = NOT_HAPPENING) &
+		(agent_6.comprar = HAPPENING -> next(agent_6.comprar) != NOT_HAPPENING ) &
+		(agent_6.comprar = NOT_HAPPENING -> next(agent_6.comprar) != JUST_HAPPENED) &
+	  		 	(agent_1.vender = JUST_HAPPENED -> next(agent_1.vender) = NOT_HAPPENING) &
+		(agent_1.vender = HAPPENING -> next(agent_1.vender) != NOT_HAPPENING ) &
+		(agent_1.vender = NOT_HAPPENING -> next(agent_1.vender) != JUST_HAPPENED) &
+	  		 	(agent_3.comprar = JUST_HAPPENED -> next(agent_3.comprar) = NOT_HAPPENING) &
+		(agent_3.comprar = HAPPENING -> next(agent_3.comprar) != NOT_HAPPENING ) &
+		(agent_3.comprar = NOT_HAPPENING -> next(agent_3.comprar) != JUST_HAPPENED) &
+	  		 	(agent_8.comprar = JUST_HAPPENED -> next(agent_8.comprar) = NOT_HAPPENING) &
+		(agent_8.comprar = HAPPENING -> next(agent_8.comprar) != NOT_HAPPENING ) &
+		(agent_8.comprar = NOT_HAPPENING -> next(agent_8.comprar) != JUST_HAPPENED) &
+	  		 	(agent_7.comprar = JUST_HAPPENED -> next(agent_7.comprar) = NOT_HAPPENING) &
+		(agent_7.comprar = HAPPENING -> next(agent_7.comprar) != NOT_HAPPENING ) &
+		(agent_7.comprar = NOT_HAPPENING -> next(agent_7.comprar) != JUST_HAPPENED) &
+	  		 	(agent_2.comprar = JUST_HAPPENED -> next(agent_2.comprar) = NOT_HAPPENING) &
+		(agent_2.comprar = HAPPENING -> next(agent_2.comprar) != NOT_HAPPENING ) &
+		(agent_2.comprar = NOT_HAPPENING -> next(agent_2.comprar) != JUST_HAPPENED) &
+	  	--Si una acción tiene output values, al pasar de H a JH, la variable que  
+	--representa el output value toma alguno de sus valores posibles. Si la 
+	--acción no hace ese cambio de H a JH => el valor queda igual
+	--Desde H se puede pasar a JH o quedarse en H (= no pueden pasar a NH)
+	--Desde NH se puede pasar a H o quedarse en NH (= no pueden pasar a JH)
+             	--Contadores:
+	--Si ocurre alguna de las acciones que incrementan/decrementan al contador y esto no provoca que se excedan los limites del mismo => se modifica al contador
+	--Si ocurre alguna de las acciones que incrementan/decrementan al contador pero se excede algún limite del mismo => se le asigna el valor del límite alcanzado
+	--Si no ocurre ninguna de las acciones que modifican al contador => este no se modifica.
+	--Si ocurre alguna de las acciones que asignan valor al contador ('resets with action' o 'sets with action')=> se modifica al contador.
+	--Si ocurre alguna de las acciones que modifican al contador => no puede ocurrir ninguna otra.
+	--Si está por ocurrir alguna de las acciones que incrementan/decrementan al contador pero se exceden los limites del mismo y el contador controla alguno de estos límites => no se permite la ejecución de la acción.
+ 	(next(agent_6.vender) = JUST_HAPPENED  & (ventas_realizadas + 1 <= 20) 
+	& (ventas_realizadas + 1 >= 0) -> next(ventas_realizadas) = ventas_realizadas + 1) &		
+ 	(next(agent_4.vender) = JUST_HAPPENED  & (ventas_realizadas + 1 <= 20) 
+	& (ventas_realizadas + 1 >= 0) -> next(ventas_realizadas) = ventas_realizadas + 1) &		
+ 	(next(agent_8.vender) = JUST_HAPPENED  & (ventas_realizadas + 1 <= 20) 
+	& (ventas_realizadas + 1 >= 0) -> next(ventas_realizadas) = ventas_realizadas + 1) &		
+ 	(next(agent_7.vender) = JUST_HAPPENED  & (ventas_realizadas + 1 <= 20) 
+	& (ventas_realizadas + 1 >= 0) -> next(ventas_realizadas) = ventas_realizadas + 1) &		
+ 	(next(agent_1.vender) = JUST_HAPPENED  & (ventas_realizadas + 1 <= 20) 
+	& (ventas_realizadas + 1 >= 0) -> next(ventas_realizadas) = ventas_realizadas + 1) &		
+  	(next(agent_5.comprar) = JUST_HAPPENED  & (compras_realizadas + 1 <= 20) 
+	& (compras_realizadas + 1 >= 0) -> next(compras_realizadas) = compras_realizadas + 1) &		
+ 	(next(agent_6.comprar) = JUST_HAPPENED  & (compras_realizadas + 1 <= 20) 
+	& (compras_realizadas + 1 >= 0) -> next(compras_realizadas) = compras_realizadas + 1) &		
+ 	(next(agent_9.comprar) = JUST_HAPPENED  & (compras_realizadas + 1 <= 20) 
+	& (compras_realizadas + 1 >= 0) -> next(compras_realizadas) = compras_realizadas + 1) &		
+ 	(next(agent_3.comprar) = JUST_HAPPENED  & (compras_realizadas + 1 <= 20) 
+	& (compras_realizadas + 1 >= 0) -> next(compras_realizadas) = compras_realizadas + 1) &		
+ 	(next(agent_8.comprar) = JUST_HAPPENED  & (compras_realizadas + 1 <= 20) 
+	& (compras_realizadas + 1 >= 0) -> next(compras_realizadas) = compras_realizadas + 1) &		
+ 	(next(agent_7.comprar) = JUST_HAPPENED  & (compras_realizadas + 1 <= 20) 
+	& (compras_realizadas + 1 >= 0) -> next(compras_realizadas) = compras_realizadas + 1) &		
+ 	(next(agent_4.comprar) = JUST_HAPPENED  & (compras_realizadas + 1 <= 20) 
+	& (compras_realizadas + 1 >= 0) -> next(compras_realizadas) = compras_realizadas + 1) &		
+ 	(next(agent_2.comprar) = JUST_HAPPENED  & (compras_realizadas + 1 <= 20) 
+	& (compras_realizadas + 1 >= 0) -> next(compras_realizadas) = compras_realizadas + 1) &		
+ 
+  		(next(agent_6.vender) = JUST_HAPPENED 	& (ventas_realizadas + 1 > 20)
+	-> next(ventas_realizadas) = 20 ) &	
+	 		(next(agent_6.vender) = JUST_HAPPENED 	& (ventas_realizadas + 1 < 0) 
+	-> next(ventas_realizadas) = 0 ) &	
+	  		(next(agent_4.vender) = JUST_HAPPENED 	& (ventas_realizadas + 1 > 20)
+	-> next(ventas_realizadas) = 20 ) &	
+	 		(next(agent_4.vender) = JUST_HAPPENED 	& (ventas_realizadas + 1 < 0) 
+	-> next(ventas_realizadas) = 0 ) &	
+	  		(next(agent_8.vender) = JUST_HAPPENED 	& (ventas_realizadas + 1 > 20)
+	-> next(ventas_realizadas) = 20 ) &	
+	 		(next(agent_8.vender) = JUST_HAPPENED 	& (ventas_realizadas + 1 < 0) 
+	-> next(ventas_realizadas) = 0 ) &	
+	  		(next(agent_7.vender) = JUST_HAPPENED 	& (ventas_realizadas + 1 > 20)
+	-> next(ventas_realizadas) = 20 ) &	
+	 		(next(agent_7.vender) = JUST_HAPPENED 	& (ventas_realizadas + 1 < 0) 
+	-> next(ventas_realizadas) = 0 ) &	
+	  		(next(agent_1.vender) = JUST_HAPPENED 	& (ventas_realizadas + 1 > 20)
+	-> next(ventas_realizadas) = 20 ) &	
+	 		(next(agent_1.vender) = JUST_HAPPENED 	& (ventas_realizadas + 1 < 0) 
+	-> next(ventas_realizadas) = 0 ) &	
+	   		(next(agent_5.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 > 20)
+	-> next(compras_realizadas) = 20 ) &	
+	 		(next(agent_5.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 < 0) 
+	-> next(compras_realizadas) = 0 ) &	
+	  		(next(agent_6.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 > 20)
+	-> next(compras_realizadas) = 20 ) &	
+	 		(next(agent_6.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 < 0) 
+	-> next(compras_realizadas) = 0 ) &	
+	  		(next(agent_9.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 > 20)
+	-> next(compras_realizadas) = 20 ) &	
+	 		(next(agent_9.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 < 0) 
+	-> next(compras_realizadas) = 0 ) &	
+	  		(next(agent_3.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 > 20)
+	-> next(compras_realizadas) = 20 ) &	
+	 		(next(agent_3.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 < 0) 
+	-> next(compras_realizadas) = 0 ) &	
+	  		(next(agent_8.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 > 20)
+	-> next(compras_realizadas) = 20 ) &	
+	 		(next(agent_8.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 < 0) 
+	-> next(compras_realizadas) = 0 ) &	
+	  		(next(agent_7.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 > 20)
+	-> next(compras_realizadas) = 20 ) &	
+	 		(next(agent_7.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 < 0) 
+	-> next(compras_realizadas) = 0 ) &	
+	  		(next(agent_4.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 > 20)
+	-> next(compras_realizadas) = 20 ) &	
+	 		(next(agent_4.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 < 0) 
+	-> next(compras_realizadas) = 0 ) &	
+	  		(next(agent_2.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 > 20)
+	-> next(compras_realizadas) = 20 ) &	
+	 		(next(agent_2.comprar) = JUST_HAPPENED 	& (compras_realizadas + 1 < 0) 
+	-> next(compras_realizadas) = 0 ) &	
+	  		(
+  	(next(agent_6.vender) != JUST_HAPPENED  ) &  	(next(agent_4.vender) != JUST_HAPPENED  ) &  	(next(agent_8.vender) != JUST_HAPPENED  ) &  	(next(agent_7.vender) != JUST_HAPPENED  ) &  	(next(agent_1.vender) != JUST_HAPPENED  )   	-> next(ventas_realizadas) = ventas_realizadas ) &
+  		(
+  	(next(agent_5.comprar) != JUST_HAPPENED  ) &  	(next(agent_6.comprar) != JUST_HAPPENED  ) &  	(next(agent_9.comprar) != JUST_HAPPENED  ) &  	(next(agent_3.comprar) != JUST_HAPPENED  ) &  	(next(agent_8.comprar) != JUST_HAPPENED  ) &  	(next(agent_7.comprar) != JUST_HAPPENED  ) &  	(next(agent_4.comprar) != JUST_HAPPENED  ) &  	(next(agent_2.comprar) != JUST_HAPPENED  )   	-> next(compras_realizadas) = compras_realizadas ) &
+ 	 	 	 	(next(agent_6.vender) = JUST_HAPPENED -> TRUE 
+           & next(agent_4.vender) !=  JUST_HAPPENED       & next(agent_8.vender) !=  JUST_HAPPENED       & next(agent_7.vender) !=  JUST_HAPPENED       & next(agent_1.vender) !=  JUST_HAPPENED        ) &
+ 	(next(agent_4.vender) = JUST_HAPPENED -> TRUE 
+      & next(agent_6.vender) !=  JUST_HAPPENED            & next(agent_8.vender) !=  JUST_HAPPENED       & next(agent_7.vender) !=  JUST_HAPPENED       & next(agent_1.vender) !=  JUST_HAPPENED        ) &
+ 	(next(agent_8.vender) = JUST_HAPPENED -> TRUE 
+      & next(agent_6.vender) !=  JUST_HAPPENED       & next(agent_4.vender) !=  JUST_HAPPENED            & next(agent_7.vender) !=  JUST_HAPPENED       & next(agent_1.vender) !=  JUST_HAPPENED        ) &
+ 	(next(agent_7.vender) = JUST_HAPPENED -> TRUE 
+      & next(agent_6.vender) !=  JUST_HAPPENED       & next(agent_4.vender) !=  JUST_HAPPENED       & next(agent_8.vender) !=  JUST_HAPPENED            & next(agent_1.vender) !=  JUST_HAPPENED        ) &
+ 	(next(agent_1.vender) = JUST_HAPPENED -> TRUE 
+      & next(agent_6.vender) !=  JUST_HAPPENED       & next(agent_4.vender) !=  JUST_HAPPENED       & next(agent_8.vender) !=  JUST_HAPPENED       & next(agent_7.vender) !=  JUST_HAPPENED             ) &
+ 	 	(next(agent_5.comprar) = JUST_HAPPENED -> TRUE 
+           & next(agent_6.comprar) !=  JUST_HAPPENED       & next(agent_9.comprar) !=  JUST_HAPPENED       & next(agent_3.comprar) !=  JUST_HAPPENED       & next(agent_8.comprar) !=  JUST_HAPPENED       & next(agent_7.comprar) !=  JUST_HAPPENED       & next(agent_4.comprar) !=  JUST_HAPPENED       & next(agent_2.comprar) !=  JUST_HAPPENED        ) &
+ 	(next(agent_6.comprar) = JUST_HAPPENED -> TRUE 
+      & next(agent_5.comprar) !=  JUST_HAPPENED            & next(agent_9.comprar) !=  JUST_HAPPENED       & next(agent_3.comprar) !=  JUST_HAPPENED       & next(agent_8.comprar) !=  JUST_HAPPENED       & next(agent_7.comprar) !=  JUST_HAPPENED       & next(agent_4.comprar) !=  JUST_HAPPENED       & next(agent_2.comprar) !=  JUST_HAPPENED        ) &
+ 	(next(agent_9.comprar) = JUST_HAPPENED -> TRUE 
+      & next(agent_5.comprar) !=  JUST_HAPPENED       & next(agent_6.comprar) !=  JUST_HAPPENED            & next(agent_3.comprar) !=  JUST_HAPPENED       & next(agent_8.comprar) !=  JUST_HAPPENED       & next(agent_7.comprar) !=  JUST_HAPPENED       & next(agent_4.comprar) !=  JUST_HAPPENED       & next(agent_2.comprar) !=  JUST_HAPPENED        ) &
+ 	(next(agent_3.comprar) = JUST_HAPPENED -> TRUE 
+      & next(agent_5.comprar) !=  JUST_HAPPENED       & next(agent_6.comprar) !=  JUST_HAPPENED       & next(agent_9.comprar) !=  JUST_HAPPENED            & next(agent_8.comprar) !=  JUST_HAPPENED       & next(agent_7.comprar) !=  JUST_HAPPENED       & next(agent_4.comprar) !=  JUST_HAPPENED       & next(agent_2.comprar) !=  JUST_HAPPENED        ) &
+ 	(next(agent_8.comprar) = JUST_HAPPENED -> TRUE 
+      & next(agent_5.comprar) !=  JUST_HAPPENED       & next(agent_6.comprar) !=  JUST_HAPPENED       & next(agent_9.comprar) !=  JUST_HAPPENED       & next(agent_3.comprar) !=  JUST_HAPPENED            & next(agent_7.comprar) !=  JUST_HAPPENED       & next(agent_4.comprar) !=  JUST_HAPPENED       & next(agent_2.comprar) !=  JUST_HAPPENED        ) &
+ 	(next(agent_7.comprar) = JUST_HAPPENED -> TRUE 
+      & next(agent_5.comprar) !=  JUST_HAPPENED       & next(agent_6.comprar) !=  JUST_HAPPENED       & next(agent_9.comprar) !=  JUST_HAPPENED       & next(agent_3.comprar) !=  JUST_HAPPENED       & next(agent_8.comprar) !=  JUST_HAPPENED            & next(agent_4.comprar) !=  JUST_HAPPENED       & next(agent_2.comprar) !=  JUST_HAPPENED        ) &
+ 	(next(agent_4.comprar) = JUST_HAPPENED -> TRUE 
+      & next(agent_5.comprar) !=  JUST_HAPPENED       & next(agent_6.comprar) !=  JUST_HAPPENED       & next(agent_9.comprar) !=  JUST_HAPPENED       & next(agent_3.comprar) !=  JUST_HAPPENED       & next(agent_8.comprar) !=  JUST_HAPPENED       & next(agent_7.comprar) !=  JUST_HAPPENED            & next(agent_2.comprar) !=  JUST_HAPPENED        ) &
+ 	(next(agent_2.comprar) = JUST_HAPPENED -> TRUE 
+      & next(agent_5.comprar) !=  JUST_HAPPENED       & next(agent_6.comprar) !=  JUST_HAPPENED       & next(agent_9.comprar) !=  JUST_HAPPENED       & next(agent_3.comprar) !=  JUST_HAPPENED       & next(agent_8.comprar) !=  JUST_HAPPENED       & next(agent_7.comprar) !=  JUST_HAPPENED       & next(agent_4.comprar) !=  JUST_HAPPENED             ) &
+ 
+  	      	      	      	      	       	      	      	      	      	      	      	      	      TRUE

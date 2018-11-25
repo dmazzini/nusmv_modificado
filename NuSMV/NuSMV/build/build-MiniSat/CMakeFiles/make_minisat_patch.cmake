@@ -1,0 +1,8 @@
+file(READ "/home/damian/Facultad/Tesis/NuSMV_Francisco/MiniSat/MiniSat_v37dc6c6_nusmv.patch" _minisat_patch)
+file(WRITE "/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/build-MiniSat/MiniSat_v37dc6c6_nusmv.patch" "${_minisat_patch}")
+if(EXISTS "/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/build-MiniSat/minisat-37dc6c67e2af26379d88ce349eb9c4c6160e8543")
+    file(REMOVE_RECURSE "/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/build-MiniSat/minisat-37dc6c67e2af26379d88ce349eb9c4c6160e8543")
+endif()
+if(EXISTS "/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/build-MiniSat/patched_37dc6c6")
+    file(REMOVE "/home/damian/Facultad/Tesis/NuSMV_Francisco/NuSMV/build/build-MiniSat/patched_37dc6c6")
+endif()

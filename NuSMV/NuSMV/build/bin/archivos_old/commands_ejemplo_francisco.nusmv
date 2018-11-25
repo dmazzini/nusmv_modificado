@@ -1,0 +1,3 @@
+go;
+check_ltlspec -o nusmvOut.nusmv -p "!( F(y=2|z=3) )";
+quit;
